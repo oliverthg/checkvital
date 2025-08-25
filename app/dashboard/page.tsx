@@ -42,16 +42,16 @@ export default function DashboardPage() {
     }
   }
 
-  async function onDelete(id: string, storagePath: string) {
-    if (!confirm('Apagar este documento?')) return
-    setBusy(true)
-    try {
-      await deleteMedicalFile(id, storagePath)
-      await refresh()
-    } catch (e: any) {
-      alert(e.message || 'Erro ao apagar')
-    } finally {
-      setBusy(false)
+async function onDelete(id: string, storagePath: string) {
+  if (!confirm('Apagar este documento?')) return
+  setBusy(true)
+  try {
+    await deleteMedicalFile(id, storagePath)
+    await refresh()
+  } catch (e: any) {
+    alert(e.message || 'Erro ao apagar')
+  } finally {
+    setBusy(false)
     }
   }
 
