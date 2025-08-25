@@ -42,16 +42,16 @@ export default function DashboardPage() {
     }
   }
 
-async function onDelete(id: string, storagePath: string) {
-  if (!confirm('Apagar este documento?')) return
-  setBusy(true)
-  try {
-    await deleteMedicalFile(id, storagePath)
-    await refresh()
-  } catch (e: any) {
-    alert(e.message || 'Erro ao apagar')
-  } finally {
-    setBusy(false)
+  async function onDelete(id: string, storagePath: string) {
+    if (!confirm('Apagar este documento?')) return
+    setBusy(true)
+    try {
+      await deleteMedicalFile(id, storagePath)
+      await refresh()
+    } catch (e: any) {
+      alert(e.message || 'Erro ao apagar')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -95,9 +95,7 @@ async function onDelete(id: string, storagePath: string) {
             <option value="outro">Outro</option>
           </select>
           <label
-            className={`cursor-pointer rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white ${
-              busy ? 'opacity-60' : ''
-            }`}
+            className={`cursor-pointer rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white ${busy ? 'opacity-60' : ''}`}
           >
             {busy ? 'Enviando…' : 'Enviar arquivo'}
             <input type="file" className="hidden" onChange={onUpload} disabled={busy} />
@@ -108,10 +106,7 @@ async function onDelete(id: string, storagePath: string) {
       <section className="mt-4 space-y-2">
         {docs.length === 0 && <p className="text-center text-sm text-gray-500">Nenhum documento enviado.</p>}
         {docs.map((d) => (
-          <article
-            key={d.id}
-            className="flex items-center justify-between rounded-xl border bg-white p-3 text-sm shadow-sm"
-          >
+          <article key={d.id} className="flex items-center justify-between rounded-xl border bg-white p-3 text-sm shadow-sm">
             <div className="min-w-0">
               <p className="truncate font-medium">{d.file_name}</p>
               <p className="truncate text-xs text-gray-500">
