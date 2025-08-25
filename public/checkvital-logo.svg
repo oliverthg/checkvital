@@ -1,0 +1,33 @@
+<svg width="1200" height="400" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <style>
+      .title { font: 700 140px 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill: #0f172a; }
+      .accent { fill: url(#g); }
+      .subtitle { font: 500 28px 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; fill: #334155; }
+    </style>
+  </defs>
+
+  <!-- Icon -->
+  <g transform="translate(40,40)">
+    <rect x="0" y="0" width="320" height="320" rx="56" fill="#0b1220" opacity="0.04"/>
+    <rect x="16" y="16" width="288" height="288" rx="48" fill="white" stroke="#e2e8f0"/>
+    <!-- Document shape -->
+    <path d="M96 80h88l48 48v144a16 16 0 0 1 -16 16H112a16 16 0 0 1 -16 -16z" fill="url(#g)"/>
+    <rect x="128" y="152" width="120" height="16" rx="8" fill="white" opacity="0.9"/>
+    <rect x="128" y="188" width="96" height="16" rx="8" fill="white" opacity="0.9"/>
+    <!-- Check mark circle -->
+    <circle cx="232" cy="264" r="36" fill="white"/>
+    <path d="M214 264l12 12 24-28" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Plus cross (medical) -->
+    <rect x="60" y="176" width="24" height="72" rx="6" fill="white"/>
+    <rect x="36" y="200" width="72" height="24" rx="6" fill="white"/>
+  </g>
+
+  <!-- Brand text -->
+  <text x="400" y="170" class="title"><tspan class="accent">Check</tspan>Vital</text>
+  <text x="400" y="235" class="subtitle">Seus exames, receitas e vacinas organizados em um só lugar</text>
+</svg>
