@@ -1,110 +1,103 @@
-'use client'
+"use client"
+
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-
+import type { Doc } from "@/lib/types"
+import {
+  listMedicalFiles,
+  deleteMedicalFile,
+  getSignedUrl,
+  // importe aqui a sua função de upload já existente:
+  // uploadMedicalFile,
+} from "@/lib/storage"
 import UploadBox from "@/components/UploadBox"
-import DocCard from "@/components/DocCard"
-
-import { supabaseBrowser } from "@/lib/supabaseClient"
-import { uploadMedicalFile, listMedicalFiles, deleteMedicalFile, getSignedUrl } from "@/lib/storage"
-
-type Doc = {
-  id: string
-  file_name: string
-  category: "exame" | "receita" | "vacina" | "outro"
-  size_bytes?: number
-  created_at?: string
-  storage_path: string
-}
 
 export default function DashboardPage() {
-  const supabase = supabaseBrowser()
-  const router = useRouter()
-
-  const [user, setUser] = useState<any>(null)
-  const [docs, setDocs] = useState<Doc[]>([])
   const [busy, setBusy] = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) router.push("/sign-in")
-      else {
-        setUser(data.user)
-        await refresh()
-      }
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  const [docs, setDocs] = useState<Doc[]>([])
 
   async function refresh() {
-    const rows = await listMedicalFiles()
-    setDocs(rows as any)
+    const items = await listMedicalFiles()
+    setDocs(items)
   }
 
-  async function handleUpload(file: File, category: Doc["category"]) {
-    setBusy(true)
+  useEffect(() => {
+    refresh()
+  }, [])
+
+  const onUpload = async (file: File, category: Doc["category"]) => {
     try {
-      await uploadMedicalFile(file, category)
+      setBusy(true)
+      // Chame sua função de upload existente.
+      // Ela deve inserir na tabela "documents" e salvar arquivo no storage.
+      // Exemplo se o nome for `uploadMedicalFile`:
+      // await uploadMedicalFile(file, category)
+
       await refresh()
-    } catch (e: any) {
-      alert(e.message || "Erro ao enviar")
     } finally {
       setBusy(false)
     }
   }
 
-  async function onDelete(doc: Doc) {
+  const onDelete = async (doc: Doc) => {
     if (!confirm("Apagar este documento?")) return
-    setBusy(true)
     try {
+      setBusy(true)
       await deleteMedicalFile(doc.id, doc.storage_path)
       await refresh()
-    } catch (e: any) {
-      alert(e.message || "Erro ao apagar")
     } finally {
       setBusy(false)
     }
   }
 
-  async function onDownload(storagePath: string) {
-    try {
-      const url = await getSignedUrl(storagePath)
-      window.open(url, "_blank")
-    } catch {
-      alert("Falha ao gerar link de download")
-    }
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut()
-    router.push("/sign-in")
+  const onDownload = async (doc: Doc) => {
+    const url = await getSignedUrl(doc.storage_path)
+    window.open(url, "_blank")
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-600">Logado como</p>
-          <p className="text-sm font-medium">{user?.email}</p>
-        </div>
-        <button
-          onClick={signOut}
-          className="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white hover:bg-red-700"
-        >
-          Sair
-        </button>
-      </div>
+    <main className="p-6 max-w-3xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">CheckVital</h1>
 
-      <UploadBox busy={busy} onUpload={handleUpload} />
-
-      <section className="space-y-3">
-        {docs.length === 0 && (
-          <p className="text-center text-sm text-gray-500">Nenhum documento enviado.</p>
-        )}
-        {docs.map((d) => (
-          <DocCard key={d.id} doc={d} onDownload={onDownload} onDelete={onDelete} />
-        ))}
+      <section className="mb-8">
+        <UploadBox busy={busy} onUpload={onUpload} />
       </section>
-    </div>
+
+      <section className="space-y-4">
+        {docs.length === 0 ? (
+          <p className="text-gray-600">Nenhum documento enviado.</p>
+        ) : (
+          docs.map((doc) => (
+            <div
+              key={doc.id}
+              className="flex items-center justify-between rounded-xl border p-4"
+            >
+              <div className="min-w-0">
+                <p className="font-medium truncate">{doc.name}</p>
+                <p className="text-sm text-gray-600">
+                  {doc.category} • {(doc.size_bytes / 1024).toFixed(1)} KB •{" "}
+                  {new Date(doc.created_at).toLocaleDateString("pt-BR")}
+                </p>
+              </div>
+
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => onDownload(doc)}
+                  className="px-3 py-1 rounded-md border"
+                >
+                  Baixar
+                </button>
+                <button
+                  onClick={() => onDelete(doc)}
+                  className="px-3 py-1 rounded-md border text-red-600"
+                  disabled={busy}
+                >
+                  Apagar
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+    </main>
   )
 }
