@@ -30,20 +30,26 @@ export async function uploadMedicalFile(file: File, category: string) {
   return ins.data
 }
 
-export async function listMedicalFiles() {
+export async function listMedicalFiles(): Promise<Doc[]> {
   const supabase = supabaseBrowser()
-  const { data, error } = await supabase.from('documents').select('*').order('created_at', { ascending: false })
+  const { data, error } = await supabase
+    .from("documents")
+    .select("*")
+    .order("created_at", { ascending: false })
+
   if (error) throw error
-  return data
+  return data as Doc[]
 }
 
-export async function deleteMedicalFile(id: string, storagePath: string) {
+export async function deleteMedicalFile(id: string, storagePath: string): Promise<void> {
   const supabase = supabaseBrowser()
-  const del = await supabase.from('documents').delete().eq('id', id)
+  const del = await supabase.from("documents").delete().eq("id", id)
   if (del.error) throw del.error
-  const st = await supabase.storage.from('medical_docs').remove([storagePath])
+
+  const st = await supabase.storage.from("medical_docs").remove([storagePath])
   if (st.error) throw st.error
 }
+
 
 export async function getSignedUrl(storagePath: string) {
   const supabase = supabaseBrowser()
