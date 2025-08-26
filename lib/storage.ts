@@ -1,3 +1,5 @@
+import type { Doc } from "./types"
+
 import { supabaseBrowser } from '@/lib/supabaseClient'
 
 export async function uploadMedicalFile(file: File, category: string) {
