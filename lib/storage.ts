@@ -1,35 +1,10 @@
-import type { Doc } from "./types"
+// lib/storage.ts
+import { supabaseBrowser } from "./supabaseClient" // (deixe como já está no seu projeto)
+import type { Doc } from "./types"                 // <-- ADICIONE ESTA LINHA
 
-import { supabaseBrowser } from '@/lib/supabaseClient'
+// ... (sua função de upload que você já tem) ...
 
-export async function uploadMedicalFile(file: File, category: string) {
-  const supabase = supabaseBrowser()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Não autenticado')
-
-  const ext = file.name.split('.').pop() || 'bin'
-  const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-  const up = await supabase.storage.from('medical_docs').upload(path, file, {
-    cacheControl: '3600', upsert: false, contentType: file.type || 'application/octet-stream'
-  })
-  if (up.error) throw up.error
-
-  const ins = await supabase.from('documents').insert({
-    user_id: user.id,
-    category,
-    file_name: file.name,
-    storage_path: path,
-    mime_type: file.type,
-    size_bytes: file.size,
-  }).select().single()
-  if (ins.error) {
-    await supabase.storage.from('medical_docs').remove([path])
-    throw ins.error
-  }
-  return ins.data
-}
-
+// Lista documentos
 export async function listMedicalFiles(): Promise<Doc[]> {
   const supabase = supabaseBrowser()
   const { data, error } = await supabase
@@ -41,8 +16,10 @@ export async function listMedicalFiles(): Promise<Doc[]> {
   return data as Doc[]
 }
 
+// Deleta documento + arquivo no storage
 export async function deleteMedicalFile(id: string, storagePath: string): Promise<void> {
   const supabase = supabaseBrowser()
+
   const del = await supabase.from("documents").delete().eq("id", id)
   if (del.error) throw del.error
 
@@ -50,13 +27,14 @@ export async function deleteMedicalFile(id: string, storagePath: string): Promis
   if (st.error) throw st.error
 }
 
-
-export async function getSignedUrl(storagePath: string) {
+// Gera URL assinada (se você usa isso para download/preview)
+export async function getSignedUrl(storagePath: string): Promise<string> {
   const supabase = supabaseBrowser()
   const { data, error } = await supabase
     .storage
-    .from('medical_docs')
+    .from("medical_docs")
     .createSignedUrl(storagePath, 60 * 5)
+
   if (error) throw error
   return data.signedUrl
 }
